@@ -4,7 +4,7 @@
 #include <string_view>
 #include <type_traits>
 
-#include "sol/utlis/magic.h"
+#include "sol/utils/magic.h"
 
 /**
  * @file
