@@ -6,43 +6,22 @@
 
 #include "sol/utlis/magic.h"
 
-// Provides functionality for type conversions between C++ types and database strings.
-//
-// Example usage for a custom type:
-// struct MyCustomType {
-//   int id;
-//   std::string name;
-// };
-//
-// template <>
-// constexpr std::string_view sqliteol::ToDataBaseType<MyCustomType>() {
-//   return "TEXT";
-// }
-//
-// template <>
-// std::string sqliteol::ToDataBaseString(const MyCustomType& value) {
-//   return std::to_string(value.id) + "|" + value.name;
-// }
-//
-// template <>
-// MyCustomType sqliteol::FromDataBaseString<MyCustomType>(std::string_view str) {
-//   auto pos = str.find('|');
-//   return MyCustomType{std::stoi(std::string(str.substr(0, pos))),
-//                       std::string(str.substr(pos + 1))};
-// }
-//
-// int main() {
-//   MyCustomType my_custom_type{42, "hello"};
-//   std::string db_string = sqliteol::ToDataBaseString(my_custom_type); // "42|hello"
-//   MyCustomType my_custom_type_copy =
-//   sqliteol::FromDataBaseString<MyCustomType>(db_string); // {42, "hello"} return 0;
-// }
-//
+/**
+ * @file
+ * Provides functionality for type conversions between C++ types and database strings.
+ *
+ * @details This header defines templates that convert C++ data types to and from strings
+ *          that can be stored in a database. It uses specializations for common types
+ *          like integral types, floating-point types, and strings.
+ */
+
 namespace sqliteol {
 
 /**
  * @concept Convertible
- * @brief Checks for type convertibility to sqlite-compatible strings.
+ * @brief Checks for type convertibility to SQLite-compatible strings.
+ *
+ * @tparam T The type to check for convertibility.
  */
 template <typename T>
 concept Convertible = requires(T a) {
@@ -93,7 +72,6 @@ T FromDataBaseString(std::string_view str) {
 }
 
 // Floating-point types specializations
-
 template <std::floating_point T>
 constexpr std::string_view ToDataBaseType() {
   return "REAL";
