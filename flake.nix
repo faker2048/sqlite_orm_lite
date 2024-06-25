@@ -8,7 +8,7 @@
   };
 
   outputs = { self, nixpkgs, ... }@inputs: inputs.utils.lib.eachSystem [
-    "x86_64-linux" "i686-linux" "aarch64-linux" "x86_64-darwin"
+    "x86_64-linux" "i686-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"
   ] (system: let
     pkgs = import nixpkgs {
       inherit system;
@@ -27,7 +27,7 @@
 
       packages = with pkgs; [
         # Development Tools
-        llvmPackages_19.clang
+        llvmPackages_18.clang
         cmake
         cmakeCurses
 
@@ -37,6 +37,7 @@
         # Build time and Run time dependencies
         spdlog
         abseil-cpp
+        sqlite.dev
       ];
 
       # Setting up the environment variables you need during
