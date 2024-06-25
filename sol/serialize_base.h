@@ -15,6 +15,50 @@
  *          like integral types, floating-point types, and strings.
  */
 
+/**********************************
+ * EXAMPLE USAGE FOR CUSTOM TYPES *
+ **********************************/
+
+/*
+ * Example usage for a custom type:
+ * struct MyCustomType {
+ *   int id;
+ *   std::string name;
+ * };
+ *
+ * template <>
+ * constexpr std::string_view sqliteol::ToDataBaseType<MyCustomType>() {
+ *   return "TEXT";
+ * }
+ *
+ * template <>
+ * std::string sqliteol::ToDataBaseString(const MyCustomType& value) {
+ *   return std::to_string(value.id) + "|" + value.name;
+ * }
+ *
+ * template <>
+ * MyCustomType sqliteol::FromDataBaseString<MyCustomType>(std::string_view str) {
+ *   auto pos = str.find('|');
+ *   return MyCustomType{std::stoi(std::string(str.substr(0, pos))),
+ *                       std::string(str.substr(pos + 1))};
+ * }
+ *
+ * int main() {
+ *   MyCustomType my_custom_type{42, "hello"};
+ *   std::string db_string = sqliteol::ToDataBaseString(my_custom_type); // "42|hello"
+ *   MyCustomType my_custom_type_copy =
+ *   sqliteol::FromDataBaseString<MyCustomType>(db_string); // {42, "hello"}
+ *   return 0;
+ * }
+ */
+
+/**********************************
+ * CONCEPTS AND TYPE CONVERSIONS  *
+ * FOR C++ BASE TYPES             *
+ * (INTEGRAL, FLOATING-POINT,     *
+ * AND STRING TYPES)              *
+ * ********************************/
+
 namespace sqliteol {
 
 /**
