@@ -1,24 +1,36 @@
+
+
+
+
+# sol_cc_gtest(
+#   NAME
+#     serialize_base_test
+#   SRCS
+#     "serialize_base_test.cc"
+#   DEPS
+# )
+
+
 function(sol_cc_library)
   cmake_parse_arguments(
     PARSE_ARGV 0
     arg
-    "PUBLIC"  # 单个选项
-    "NAME"    # 单个值参数
-    "HDRS;SRCS"  # 多值参数
+    "PUBLIC"  # Option to mark library for public interface usage
+    "NAME"    # Single-value parameter: the name of the library
+    "HDRS;SRCS"  # Multi-value parameters: headers and sources of the library
   )
 
-  # 创建库
+  # Create the library with specified sources
   add_library(${arg_NAME} ${arg_SRCS})
 
-  # 公共接口
+  # Apply public interface settings
   if(arg_PUBLIC)
     target_compile_definitions(${arg_NAME} INTERFACE SOL_LIBRARY_EXPORT)
   endif()
 endfunction()
 
-
 function(sol_cc_gtest)
-  # 检查是否启用测试
+  # Check if testing is disabled
   if(DISABLE_TESTING)
     return()
   endif()
@@ -26,21 +38,20 @@ function(sol_cc_gtest)
   cmake_parse_arguments(
     PARSE_ARGV 0
     arg
-    ""        # 无选项参数
-    "NAME"    # 单个值参数
-    "SRCS;DEPS"  # 多值参数
+    ""        # No options
+    "NAME"    # Single-value parameter: the name of the executable
+    "SRCS;DEPS"  # Multi-value parameters: sources and dependencies of the executable
   )
 
-  # 创建可执行文件
+  # Create the executable
   add_executable(${arg_NAME} ${arg_SRCS})
 
-  # 设置目标属性，确保输出到 tests/ 目录
+  # Set properties for the target to ensure output is in the 'tests/' directory
   set_target_properties(${arg_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
   )
 
-  # 添加依赖
+  # Link dependencies and setup testing
   target_link_libraries(${arg_NAME} ${arg_DEPS} GTest::gmock GTest::gtest_main)
   gtest_discover_tests(${arg_NAME})
-
 endfunction()
