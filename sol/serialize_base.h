@@ -37,7 +37,7 @@ constexpr std::string_view ToDataBaseType() {
 }
 
 template <typename T>
-std::string ToDataBaseString(T&& value) {
+std::string ToDataBaseString(const T& value) {
   static_assert(Convertible<T>, "Unsupported type for ToDataBaseString");
   return "";  // Default, should never be hit if static_assert works
 }
