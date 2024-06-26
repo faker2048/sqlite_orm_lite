@@ -1,4 +1,4 @@
-#include "sol/serialize_base.h"
+#include "sol/serialize_template.h"
 
 #include <limits>
 

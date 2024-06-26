@@ -1,7 +1,7 @@
 sol_cc_gtest(
   NAME
-    serialize_base_test
+    serialize_template_test
   SRCS
-    "serialize_base_test.cc"
+    "serialize_template_test.cc"
   DEPS
 )
