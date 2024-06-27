@@ -16,7 +16,6 @@
  */
 
 namespace sqliteol {
-
 /**
  * @concept Convertible
  * @brief Checks for type convertibility to SQLite-compatible strings.
