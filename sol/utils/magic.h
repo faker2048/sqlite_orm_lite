@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -43,5 +44,36 @@ void ForRange(Func&& f) {
  */
 template <typename T>
 struct AlwaysFalse : std::false_type {};
+
+template <typename T, std::size_t Offset, std::size_t Align>
+constexpr std::size_t AlignedOffset() {
+  return (Offset + Align - 1) & ~(Align - 1);
+}
+
+// compute the offset of the I-th element in a tuple, needs to consider the alignment
+template <typename Tuple, std::size_t I>
+constexpr std::size_t GetTupleValueOffset() {
+  if constexpr (I == 0) {
+    return 0;
+  } else {
+    constexpr std::size_t prev_offset   = GetTupleValueOffset<Tuple, I - 1>();
+    constexpr std::size_t prev_size     = sizeof(std::tuple_element_t<I - 1, Tuple>);
+    constexpr std::size_t current_align = alignof(std::tuple_element_t<I, Tuple>);
+
+    return AlignedOffset<std::tuple_element_t<I, Tuple>,
+                         prev_offset + prev_size,
+                         current_align>();
+  }
+}
+
+template <typename Tuple, std::size_t I>
+std::tuple_element_t<I, Tuple>* GetFieldRef(void* first_field_ref) {
+  if constexpr (I == 0) {
+    return reinterpret_cast<std::tuple_element_t<I, Tuple>*>(first_field_ref);
+  } else {
+    return reinterpret_cast<std::tuple_element_t<I, Tuple>*>(
+        reinterpret_cast<char*>(first_field_ref) + GetTupleValueOffset<Tuple, I>());
+  }
+}
 
 }  // namespace magic
