@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "sol/sqlite_struct_info_build_cache.h"
 #include "sol/utils/str_utils.h"
 
 namespace sqliteol {
@@ -20,53 +21,23 @@ class SqliteStructInfo {
   template <size_t I>
   using ColumnType = std::tuple_element_t<I, RowType>;
 
-  template <size_t I>
-  static constexpr std::string_view SqliteColumnTypeStr_v =
-      ToDataBaseType<ColumnType<I>>();
+  using TableInfo = SqliteStructInfoBuildCache::TableInfo;
 
-  SqliteStructInfo(std::string&& table_name,
-                   std::vector<std::string>&& column_names,
-                   void* first_field_ref)
-      : table_name_(table_name),
-        column_names_(column_names),
-        first_field_ref_(first_field_ref) {
+  SqliteStructInfo(const TableInfo* kTableInfo, void* first_field_ref)
+      : kTableInfo_(kTableInfo), first_field_ref_(first_field_ref) {
   }
 
   std::string GetEnsureTableSQLExpression() const {
-    std::vector<std::string> column_spec = {};
-    magic::ForRange<0, column_size_>([&]<int I>() {
-      column_spec.push_back(
-          utils::StrCombine(column_names_[I], " ", SqliteColumnTypeStr_v<I>));
-    });
-
-    return utils::StrCombine("CREATE TABLE IF NOT EXISTS \"",
-                             table_name_,
-                             "\"( ",
-                             utils::StrJoin(", ", column_spec),
-                             " );");
+    return kTableInfo_->ensure_table_sql;
   }
 
   std::string GenerateInsertSQLExpression() const {
-    std::vector<std::string> column_names  = {};
-    std::vector<std::string> column_values = {};
-    magic::ForRange<0, column_size_>([&]<int I>() {
-      column_names.push_back(column_names_[I]);
-      column_values.push_back(
-          ToDataBaseString(*magic::GetFieldRef<RowTuple, I>(first_field_ref_)));
-    });
-
-    return utils::StrCombine("INSERT INTO \"",
-                             table_name_,
-                             "\" ( ",
-                             utils::StrJoin(", ", column_names),
-                             " ) VALUES( ",
-                             utils::StrJoin(", ", column_values),
-                             " );");
+    return kTableInfo_->insert_sql_gen(first_field_ref_);
   }
 
   void SetField(const std::string& column_name, const std::string& value) const {
     magic::ForRange<0, column_size_>([&]<int I>() {
-      if (column_name == column_names_[I]) {
+      if (column_name == kTableInfo_->column_names[I]) {
         *magic::GetFieldRef<RowTuple, I>(first_field_ref_) =
             FromDataBaseString<ColumnType<I>>(value);
       }
@@ -74,10 +45,7 @@ class SqliteStructInfo {
   }
 
  private:
-  // Although caching could be used, but it is not necessary since the
-  // database (file system) handles data storage anyway. So, let's keep the code simpler.
-  std::string table_name_;
-  std::vector<std::string> column_names_;
+  const TableInfo* kTableInfo_;
   void* first_field_ref_;
 };
 

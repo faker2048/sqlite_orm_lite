@@ -44,7 +44,8 @@ TEST(SqliteStructInfoTest, SetField) {
     };
   };
 
-  auto sqlite_struct_info = MyCustomType(1001, "myname").sqlite_helper();
+  MyCustomType my_custom_type(1001, "myname");
+  auto sqlite_struct_info = my_custom_type.sqlite_helper();
   EXPECT_EQ(sqlite_struct_info.GenerateInsertSQLExpression(),
             "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 1001, myname );");
 
