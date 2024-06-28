@@ -44,6 +44,14 @@ class SqliteStructInfo {
     });
   }
 
+  std::string_view GetTableName() const {
+    return kTableInfo_->table_name;
+  }
+
+  const std::vector<std::string>& GetColumnNames() const {
+    return kTableInfo_->column_names;
+  }
+
  private:
   const TableInfo* kTableInfo_;
   void* first_field_ref_;
