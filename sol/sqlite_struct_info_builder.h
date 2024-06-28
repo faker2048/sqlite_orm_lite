@@ -35,12 +35,16 @@ class SqliteStructInfoBuilder {
       : tmp_(std::move(tmp_)), first_field_ref_(first_field_ref) {
   }
 
-  SqliteStructInfoBuilder<CurColumnTypes...>& SetTableName(std::string_view table_name) {
+  SqliteStructInfoBuilder<CurColumnTypes...>& SetTableName(
+      const std::string& table_name) {
     std::optional<const TableInfo*> cached =
         BuildCache::GetInstance().GetTableInfo(table_name);
 
     if (cached.has_value()) {
       kTableInfo_ = cached.value();
+      if (*kTableInfo_->row_tuple_type != typeid(CurRowTuple)) {
+        throw std::runtime_error("Table name already exists with different row type");
+      }
     } else {
       tmp_             = std::make_unique<TableInfo>();
       tmp_->table_name = table_name;
@@ -64,16 +68,7 @@ class SqliteStructInfoBuilder {
 
   SqliteStructInfo<CurRowTuple> Build() {
     if (!is_built()) {
-      tmp_->ensure_table_sql = GetEnsureTableSql<CurRowTuple>();
-      tmp_->insert_sql_gen   = GenerateInsertSQLFunc<CurRowTuple>();
-      for (size_t i = 0; i < tmp_->column_names.size(); ++i) {
-        tmp_->column_name_to_index.emplace(tmp_->column_names[i], i);
-      }
-
-      std::string table_name = tmp_->table_name;
-      bool ok                = BuildCache::GetInstance().AddTableInfo(std::move(*tmp_));
-
-      kTableInfo_ = BuildCache::GetInstance().GetTableInfo(table_name).value();
+      kTableInfo_ = CreateTableInfo();
     }
 
     return SqliteStructInfo<CurRowTuple>(kTableInfo_, first_field_ref_);
@@ -84,14 +79,27 @@ class SqliteStructInfoBuilder {
     return kTableInfo_ != nullptr;
   }
 
+  const TableInfo* CreateTableInfo() {
+    tmp_->ensure_table_sql = GetEnsureTableSql<CurRowTuple>();
+    tmp_->insert_sql_gen   = GenerateInsertSQLFunc<CurRowTuple>();
+    for (size_t i = 0; i < tmp_->column_names.size(); ++i) {
+      tmp_->column_name_to_index.emplace(tmp_->column_names[i], i);
+    }
+    tmp_->row_tuple_type   = &typeid(CurRowTuple);
+    std::string table_name = tmp_->table_name;
+    BuildCache::GetInstance().AddTableInfo(std::move(*tmp_));
+    return BuildCache::GetInstance().GetTableInfo(table_name).value();
+  }
+
   template <typename RowTuple>
   std::string GetEnsureTableSql() const {
     constexpr size_t column_size = std::tuple_size_v<RowTuple>;
 
     std::vector<std::string> column_spec = {};
     magic::ForRange<0, column_size>([&]<int I>() {
+      using ColumnType = std::tuple_element_t<I, RowTuple>;
       column_spec.push_back(
-          utils::StrCombine(tmp_->column_names[I], " ", SqliteColumnTypeStr_v<I>));
+          utils::StrCombine(tmp_->column_names[I], " ", ToDataBaseType<ColumnType>()));
     });
 
     return utils::StrCombine("CREATE TABLE IF NOT EXISTS \"",

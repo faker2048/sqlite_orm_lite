@@ -36,7 +36,7 @@ struct MyCustomType {
   double height;
 
   auto sqlite_helper() {
-    return SqliteStructInfoBuilder<MyCustomType>()
+    return SqliteStructInfoBuilder<>()
         .SetTableName("MyCustomType")
         .AddColumn("id", &id)
         .AddColumn("name", &name)
@@ -62,8 +62,8 @@ class SqliteFileTest : public Test {
 
 // TEST_F(SqliteFileTest, TableCreationAndDeletion) {
 //   // Test the creation and deletion of a table.
-//   // The SetUp and TearDown already handle this, so we assume no exceptions mean success.
-//   ASSERT_NO_THROW(db_file->EnsureTable<MyCustomType>());
+//   // The SetUp and TearDown already handle this, so we assume no exceptions mean
+//   success. ASSERT_NO_THROW(db_file->EnsureTable<MyCustomType>());
 //   ASSERT_NO_THROW(db_file->DropTable<MyCustomType>());
 // }
 
