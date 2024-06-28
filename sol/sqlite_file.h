@@ -57,16 +57,16 @@ class SqliteFile {
 
   template <HasSqliteHelper T>
   void EnsureTable() {
-    auto& sql = GetDefaultSqliteHelper<T>().GetEnsureTableSQLExpression();
-    auto db   = sqlite3wrap::OpenDatabase(path_.c_str());
+    const std::string& sql = GetDefaultSqliteHelper<T>().GetEnsureTableSQL();
+    auto db                = sqlite3wrap::OpenDatabase(path_.c_str());
     sqlite3wrap::ExecuteSql(db.get(), sql);
   }
 
   template <HasSqliteHelper T>
   void DropTable() {
-    auto& table_name = GetDefaultSqliteHelper<T>().GetTableName();
-    std::string sql  = utils::StrCombine("DROP TABLE IF EXISTS \"", table_name, "\";");
-    auto db          = sqlite3wrap::OpenDatabase(path_.c_str());
+    std::string_view table_name = GetDefaultSqliteHelper<T>().GetTableName();
+    std::string sql = utils::StrCombine("DROP TABLE IF EXISTS \"", table_name, "\";");
+    auto db         = sqlite3wrap::OpenDatabase(path_.c_str());
     sqlite3wrap::ExecuteSql(db.get(), sql);
   }
 
@@ -76,20 +76,56 @@ class SqliteFile {
     auto& helper    = GetDefaultSqliteHelper<T>();
     std::string sql = utils::StrCombine("SELECT * FROM \"", helper.GetTableName(), "\";");
     auto db         = sqlite3wrap::OpenDatabase(path_.c_str());
+
+    T row;
+    auto sqlite_helper = row.sqlite_helper();
+
+    using DataToSqliteC = std::tuple<T*, decltype(sqlite_helper)*, std::vector<T>*>;
+    DataToSqliteC data_to_sqlc{&row, &sqlite_helper, &result};
+    constexpr int column_size = decltype(sqlite_helper)::column_size_;
+
     sqlite3wrap::ExecuteSql(
         db.get(),
         sql,
         [](void* data, int argc, char** argv, char** col_name) {
-          auto& result = *static_cast<std::vector<T>*>(data);
-          T row;
-          for (int i = 0; i < argc; ++i) {
-            row.SetField(col_name[i], argv[i]);
+          auto [row, sqlite_helper, result] = *static_cast<DataToSqliteC*>(data);
+          if (argc != column_size) {
+            throw std::runtime_error("Column size mismatch");
           }
-          result.push_back(row);
+
+          magic::ForRange<0, column_size>(
+              [&]<int I>() { sqlite_helper->SetFieldByIndex<I>(col_name[I], argv[I]); });
+          result->push_back(*row);
           return 0;
         },
         &result);
     return result;
+  }
+
+  template <HasSqliteHelper T>
+  void Insert(T& row) {
+    auto helper     = row.sqlite_helper();
+    std::string sql = helper.GenerateInsertSQL();
+    Execute(sql.c_str(), helper.GetTableName());
+  }
+
+  template <HasSqliteHelper T>
+  void InsertRows(std::vector<T>& rows, bool sync_off = false) {
+    if (rows.empty()) {
+      return;
+    }
+    std::vector<std::string> sqls;
+    if (sync_off) {
+      sqls.emplace_back("PRAGMA synchronous = OFF;");
+    }
+    sqls.emplace_back("BEGIN;");  // Open transaction
+    auto helper = rows.front().sqlite_helper();
+    for (auto& row : rows) {
+      helper.SetRef(&row);
+      sqls.emplace_back(helper.GenerateInsertSQL());
+    }
+    sqls.emplace_back("COMMIT;");
+    Execute(utils::StrJoin("", sqls), rows.front().sqlite_helper().GetTableName());
   }
 
  private:

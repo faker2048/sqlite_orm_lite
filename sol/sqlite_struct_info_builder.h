@@ -66,6 +66,9 @@ class SqliteStructInfoBuilder {
     if (!is_built()) {
       tmp_->ensure_table_sql = GetEnsureTableSql<CurRowTuple>();
       tmp_->insert_sql_gen   = GenerateInsertSQLFunc<CurRowTuple>();
+      for (size_t i = 0; i < tmp_->column_names.size(); ++i) {
+        tmp_->column_name_to_index.emplace(tmp_->column_names[i], i);
+      }
 
       std::string table_name = tmp_->table_name;
       bool ok                = BuildCache::GetInstance().AddTableInfo(std::move(*tmp_));

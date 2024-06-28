@@ -27,7 +27,11 @@ class SqliteStructInfo {
       : kTableInfo_(kTableInfo), first_field_ref_(first_field_ref) {
   }
 
-  std::string GetEnsureTableSQLExpression() const {
+  void SetRef(void* first_field_ref) {
+    first_field_ref_ = first_field_ref;
+  }
+
+  const std::string& GetEnsureTableSQL() const {
     return kTableInfo_->ensure_table_sql;
   }
 
@@ -42,6 +46,12 @@ class SqliteStructInfo {
             FromDataBaseString<ColumnType<I>>(value);
       }
     });
+  }
+
+  template <int I>
+  void SetFieldByIndex(const std::string& value) const {
+    *magic::GetFieldRef<RowTuple, I>(first_field_ref_) =
+        FromDataBaseString<ColumnType<I>>(value);
   }
 
   std::string_view GetTableName() const {
@@ -59,8 +69,8 @@ class SqliteStructInfo {
 
 template <typename T>
   requires requires(T x) { x.sqlite_helper(); }
-const SqliteStructInfo<T>& GetDefaultSqliteHelper() {
-  static SqliteStructInfo<T> kDefault = T{}.sqlite_helper();
+const auto& GetDefaultSqliteHelper() {
+  static auto kDefault = T{}.sqlite_helper();
   return kDefault;
 }
 
