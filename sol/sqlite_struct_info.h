@@ -57,4 +57,11 @@ class SqliteStructInfo {
   void* first_field_ref_;
 };
 
+template <typename T>
+  requires requires(T x) { x.sqlite_helper(); }
+const SqliteStructInfo<T>& GetDefaultSqliteHelper() {
+  static SqliteStructInfo<T> kDefault = T{}.sqlite_helper();
+  return kDefault;
+}
+
 }  // namespace sqliteol

@@ -15,3 +15,12 @@ sol_cc_gtest(
     "sqlite_struct_info_test.cc"
   DEPS
 )
+
+sol_cc_gtest(
+  NAME
+    sqlite_file_test
+  SRCS
+    "sqlite_file_test.cc"
+  DEPS
+    sqlite3
+)
