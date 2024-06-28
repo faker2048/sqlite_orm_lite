@@ -31,7 +31,7 @@ class SqliteStructInfo {
     return kTableInfo_->ensure_table_sql;
   }
 
-  std::string GenerateInsertSQLExpression() const {
+  std::string GenerateInsertSQL() const {
     return kTableInfo_->insert_sql_gen(first_field_ref_);
   }
 

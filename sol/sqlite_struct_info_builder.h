@@ -65,7 +65,7 @@ class SqliteStructInfoBuilder {
   SqliteStructInfo<CurRowTuple> Build() {
     if (!is_built()) {
       tmp_->ensure_table_sql = GetEnsureTableSql<CurRowTuple>();
-      tmp_->insert_sql_gen   = GenerateInsertSQLExpressionFunc<CurRowTuple>();
+      tmp_->insert_sql_gen   = GenerateInsertSQLFunc<CurRowTuple>();
 
       std::string table_name = tmp_->table_name;
       bool ok                = BuildCache::GetInstance().AddTableInfo(std::move(*tmp_));
@@ -99,7 +99,7 @@ class SqliteStructInfoBuilder {
   }
 
   template <typename RowTuple>
-  auto GenerateInsertSQLExpressionFunc() const {
+  auto GenerateInsertSQLFunc() const {
     constexpr size_t column_size    = std::tuple_size_v<RowTuple>;
     std::string column_names_joined = utils::StrJoin(", ", tmp_->column_names);
 

@@ -25,7 +25,7 @@ TEST(SqliteStructInfoTest, BuildSqliteStructInfo) {
   EXPECT_EQ(
       sqlite_struct_info.GetEnsureTableSQLExpression(),
       "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INT, name TEXT, heigh REAL );");
-  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQLExpression(),
+  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQL(),
             "INSERT INTO \"MyCustomType\" ( id, name, heigh ) VALUES( 1001, myname, "
             "180.500000 );");
 }
@@ -46,12 +46,12 @@ TEST(SqliteStructInfoTest, SetField) {
 
   MyCustomType my_custom_type(1001, "myname");
   auto sqlite_struct_info = my_custom_type.sqlite_helper();
-  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQLExpression(),
+  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQL(),
             "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 1001, myname );");
 
   sqlite_struct_info.SetField("id", "1002");
   sqlite_struct_info.SetField("name", "newname");
-  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQLExpression(),
+  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQL(),
             "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 1002, newname );");
 }
 

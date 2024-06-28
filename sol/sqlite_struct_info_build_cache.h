@@ -51,41 +51,6 @@ class SqliteStructInfoBuildCache {
 
  private:
   SqliteStructInfoBuildCache() = default;
-
-  // template <typename RowTuple>
-  // std::string GetEnsureTableSql() const {
-  //   constexpr size_t column_size         = std::tuple_size_v<RowTuple>;
-  //   std::vector<std::string> column_spec = {};
-  //   magic::ForRange<0, column_size>([&]<int I>() {
-  //     column_spec.push_back(
-  //         utils::StrCombine(column_names_[I], " ", SqliteColumnTypeStr_v<I>));
-  //   });
-  //   return utils::StrCombine("CREATE TABLE IF NOT EXISTS \"",
-  //                            table_name_,
-  //                            "\"( ",
-  //                            utils::StrJoin(", ", column_spec),
-  //                            " );");
-  // }
-
-  // template <typename RowTuple>
-  // std::string GenerateInsertSQLExpression() const {
-  //   constexpr size_t column_size           = std::tuple_size_v<RowTuple>;
-  //   std::vector<std::string> column_names  = {};
-  //   std::vector<std::string> column_values = {};
-  //   magic::ForRange<0, column_size_>([&]<int I>() {
-  //     column_names.push_back(column_names_[I]);
-  //     column_values.push_back(
-  //         ToDataBaseString(*magic::GetFieldRef<RowTuple, I>(first_field_ref_)));
-  //   });
-
-  //   return utils::StrCombine("INSERT INTO \"",
-  //                            table_name_,
-  //                            "\" ( ",
-  //                            utils::StrJoin(", ", column_names),
-  //                            " ) VALUES( ",
-  //                            utils::StrJoin(", ", column_values),
-  //                            " );");
-  // }
 };
 
 }  // namespace sqliteol
