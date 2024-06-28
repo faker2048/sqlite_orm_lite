@@ -9,6 +9,8 @@ if not cmake_include_path:
 # Split CMAKE_INCLUDE_PATH by colon and sort it
 include_paths = cmake_include_path.split(':')
 unique_include_paths = sorted(set(include_paths))
+unique_include_paths.insert(0, "${workspaceFolder}/")
+
 
 # Load c_cpp_properties.json file
 vscode_config_path = '.vscode/c_cpp_properties.json'
