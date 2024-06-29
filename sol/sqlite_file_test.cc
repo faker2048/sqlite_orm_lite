@@ -47,9 +47,7 @@ struct MyCustomType {
 
 TEST(SqliteFileTest, InsertAndRetrieveData) {
   TmpDir tmp_dir{"InsertAndRetrieveData"};
-  auto path = tmp_dir.path() / "test.db";
-  std::cout << path << std::endl;
-  SqliteFile db_file(path);
+  SqliteFile db_file(tmp_dir.path() / "test.db");
 
   db_file.EnsureTable<MyCustomType>();
 
@@ -63,25 +61,25 @@ TEST(SqliteFileTest, InsertAndRetrieveData) {
   EXPECT_DOUBLE_EQ(retrieved[0].height, data.height);
 }
 
-// TEST(SqliteFileTest, InsertRowsAndRetrieveData) {
-//   TmpDir tmp_dir{"InsertRowsAndRetrieveData"};
-//   SqliteFile db_file(tmp_dir.path() / "test.db");
+TEST(SqliteFileTest, InsertRowsAndRetrieveData) {
+  TmpDir tmp_dir{"InsertRowsAndRetrieveData"};
+  SqliteFile db_file(tmp_dir.path() / "test.db");
 
-//   db_file.EnsureTable<MyCustomType>();
+  db_file.EnsureTable<MyCustomType>();
 
-//   std::vector<MyCustomType> data = {
-//       {1, "Alice", 1.70}, {2, "Bob", 1.80}, {3, "Charlie", 1.90}};
+  std::vector<MyCustomType> data = {
+      {1, "Alice", 1.70}, {2, "Bob", 1.80}, {3, "Charlie", 1.90}};
 
-//   db_file.InsertRows(data);
+  db_file.InsertRows(data);
 
-//   auto retrieved = db_file.GetTable<MyCustomType>();
-//   ASSERT_EQ(retrieved.size(), data.size());
-//   for (int i = 0; i < data.size(); ++i) {
-//     EXPECT_EQ(retrieved[i].id, data[i].id);
-//     EXPECT_EQ(retrieved[i].name, data[i].name);
-//     EXPECT_DOUBLE_EQ(retrieved[i].height, data[i].height);
-//   }
-// }
+  auto retrieved = db_file.GetTable<MyCustomType>();
+  ASSERT_EQ(retrieved.size(), data.size());
+  for (int i = 0; i < data.size(); ++i) {
+    EXPECT_EQ(retrieved[i].id, data[i].id);
+    EXPECT_EQ(retrieved[i].name, data[i].name);
+    EXPECT_DOUBLE_EQ(retrieved[i].height, data[i].height);
+  }
+}
 
 }  // namespace
 
