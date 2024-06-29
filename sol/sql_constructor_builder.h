@@ -14,33 +14,32 @@
 namespace sqliteol {
 
 template <typename RowTuple>
-class SqliteStructInfo;
+class SqlConstructor;
 
 template <typename... CurColumnTypes>
-class SqliteStructInfoBuilder {
+class SqlConstructorBuilder {
  public:
   using CurRowTuple = std::tuple<CurColumnTypes...>;
-  using BuildCache  = SqliteStructInfoBuildCache;
+  using BuildCache  = SqlConstructorBuildCache;
   using TableInfo   = BuildCache::TableInfo;
 
   template <size_t I>
   static constexpr std::string_view SqliteColumnTypeStr_v =
       ToDataBaseType<std::tuple_element_t<I, CurRowTuple>>();
 
-  explicit SqliteStructInfoBuilder() {
+  explicit SqlConstructorBuilder() {
   }
 
   template <typename... ColumnTypes>
-  SqliteStructInfoBuilder(std::unique_ptr<TableInfo>&& tmp_,
-                          const TableInfo* kTableInfo,
-                          void* first_field_ref)
+  SqlConstructorBuilder(std::unique_ptr<TableInfo>&& tmp_,
+                        const TableInfo* kTableInfo,
+                        void* first_field_ref)
       : tmp_(std::move(tmp_)),
         kTableInfo_(kTableInfo),
         first_field_ref_(first_field_ref) {
   }
 
-  SqliteStructInfoBuilder<CurColumnTypes...>& SetTableName(
-      const std::string& table_name) {
+  SqlConstructorBuilder<CurColumnTypes...>& SetTableName(const std::string& table_name) {
     std::optional<const TableInfo*> cached =
         BuildCache::GetInstance().GetTableInfo(table_name);
 
@@ -57,7 +56,7 @@ class SqliteStructInfoBuilder {
   }
 
   template <typename ColumnType>
-  SqliteStructInfoBuilder<CurColumnTypes..., ColumnType> AddColumn(
+  SqlConstructorBuilder<CurColumnTypes..., ColumnType> AddColumn(
       std::string_view column_name, ColumnType* value) {
     if constexpr (std::tuple_size_v<CurRowTuple> == 0) {
       first_field_ref_ = value;
@@ -66,11 +65,11 @@ class SqliteStructInfoBuilder {
     if (!is_built()) {
       tmp_->column_names.emplace_back(column_name);
     }
-    return SqliteStructInfoBuilder<CurColumnTypes..., ColumnType>(
+    return SqlConstructorBuilder<CurColumnTypes..., ColumnType>(
         std::move(tmp_), kTableInfo_, first_field_ref_);
   }
 
-  SqliteStructInfo<CurRowTuple> Build() {
+  SqlConstructor<CurRowTuple> Build() {
     if (!is_built()) {
       kTableInfo_ = CreateTableInfo();
     } else if (*(kTableInfo_->row_tuple_type) != typeid(CurRowTuple)) {
@@ -82,7 +81,7 @@ class SqliteStructInfoBuilder {
                             typeid(CurRowTuple).name()));
     }
 
-    return SqliteStructInfo<CurRowTuple>(kTableInfo_, first_field_ref_);
+    return SqlConstructor<CurRowTuple>(kTableInfo_, first_field_ref_);
   }
 
  private:

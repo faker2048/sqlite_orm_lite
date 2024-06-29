@@ -35,8 +35,8 @@ struct MyCustomType {
   std::string name;
   double height;
 
-  auto sqlite_helper() {
-    return SqliteStructInfoBuilder<>()
+  auto sql_constructor() {
+    return SqlConstructorBuilder<>()
         .SetTableName("MyCustomType")
         .AddColumn("id", &id)
         .AddColumn("name", &name)

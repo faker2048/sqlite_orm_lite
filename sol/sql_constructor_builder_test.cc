@@ -6,13 +6,13 @@
 using namespace sqliteol;
 using namespace testing;
 
-TEST(SqliteStructInfoBuilderTest, BuildSqliteStructInfo) {
+TEST(SqlConstructorBuilderTest, BuildSqlConstructor) {
   struct MyCustomType {
     int id;
     std::string name;
 
-    auto sqlite_helper() {
-      return SqliteStructInfoBuilder<>()
+    auto sql_constructor() {
+      return SqlConstructorBuilder<>()
           .SetTableName("MyCustomType")
           .AddColumn("id", &id)
           .AddColumn("name", &name)
@@ -20,7 +20,7 @@ TEST(SqliteStructInfoBuilderTest, BuildSqliteStructInfo) {
     };
   };
 
-  auto sql_constructor = MyCustomType().sqlite_helper();
+  auto sql_constructor = MyCustomType().sql_constructor();
   EXPECT_EQ(sql_constructor.GetEnsureTableSQL(),
             "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INTEGER, name TEXT );");
   EXPECT_EQ(sql_constructor.GetInsertSQL(),

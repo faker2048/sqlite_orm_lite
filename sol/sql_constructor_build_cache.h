@@ -12,7 +12,7 @@
 
 namespace sqliteol {
 
-class SqliteStructInfoBuildCache {
+class SqlConstructorBuildCache {
  public:
   struct TableInfo {
     std::string table_name                                                 = "";
@@ -23,13 +23,13 @@ class SqliteStructInfoBuildCache {
     const std::type_info* row_tuple_type                                   = nullptr;
   };
 
-  static SqliteStructInfoBuildCache& GetInstance() {
-    static SqliteStructInfoBuildCache instance;
+  static SqlConstructorBuildCache& GetInstance() {
+    static SqlConstructorBuildCache instance;
     return instance;
   }
 
-  SqliteStructInfoBuildCache(const SqliteStructInfoBuildCache&)            = delete;
-  SqliteStructInfoBuildCache& operator=(const SqliteStructInfoBuildCache&) = delete;
+  SqlConstructorBuildCache(const SqlConstructorBuildCache&)            = delete;
+  SqlConstructorBuildCache& operator=(const SqlConstructorBuildCache&) = delete;
 
   std::optional<const TableInfo*> GetTableInfo(const std::string& table_name) const {
     std::shared_lock lock(cache_mutex_);
@@ -56,7 +56,7 @@ class SqliteStructInfoBuildCache {
   mutable std::shared_mutex cache_mutex_;
 
  private:
-  SqliteStructInfoBuildCache() = default;
+  SqlConstructorBuildCache() = default;
 };
 
 }  // namespace sqliteol

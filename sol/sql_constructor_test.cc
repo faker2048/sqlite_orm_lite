@@ -5,14 +5,14 @@
 using namespace sqliteol;
 using namespace testing;
 
-TEST(SqliteStructInfoTest, BuildSqliteStructInfo) {
+TEST(SqlConstructorTest, BuildSqlConstructor) {
   struct MyCustomType {
     int id;
     std::string name;
     double heigh;
 
-    auto sqlite_helper() {
-      return SqliteStructInfoBuilder<>()
+    auto sql_constructor() {
+      return SqlConstructorBuilder<>()
           .SetTableName("MyCustomType")
           .AddColumn("id", &id)
           .AddColumn("name", &name)
@@ -21,7 +21,7 @@ TEST(SqliteStructInfoTest, BuildSqliteStructInfo) {
     };
   };
   MyCustomType my_custom_type(1001, "myname", 180.5);
-  auto sql_constructor = my_custom_type.sqlite_helper();
+  auto sql_constructor = my_custom_type.sql_constructor();
   EXPECT_EQ(
       sql_constructor.GetEnsureTableSQL(),
       "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INT, name TEXT, heigh REAL );");
@@ -30,13 +30,13 @@ TEST(SqliteStructInfoTest, BuildSqliteStructInfo) {
             "180.500000 );");
 }
 
-TEST(SqliteStructInfoTest, SetField) {
+TEST(SqlConstructorTest, SetField) {
   struct MyCustomType2 {
     int id;
     std::string name;
 
-    auto sqlite_helper() {
-      return SqliteStructInfoBuilder<>()
+    auto sql_constructor() {
+      return SqlConstructorBuilder<>()
           .SetTableName("MyCustomType2")
           .AddColumn("id", &id)
           .AddColumn("name", &name)
@@ -45,7 +45,7 @@ TEST(SqliteStructInfoTest, SetField) {
   };
 
   MyCustomType2 my_custom_type(1001, "myname");
-  auto sql_constructor = my_custom_type.sqlite_helper();
+  auto sql_constructor = my_custom_type.sql_constructor();
   EXPECT_EQ(sql_constructor.GetInsertSQL(),
             "INSERT INTO \"MyCustomType2\" ( id, name ) VALUES( 1001, 'myname' );");
 

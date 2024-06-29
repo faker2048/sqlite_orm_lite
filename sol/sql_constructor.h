@@ -12,7 +12,7 @@
 namespace sqliteol {
 
 template <typename RowTuple>
-class SqliteStructInfo {
+class SqlConstructor {
  public:
   using RowType = RowTuple;
 
@@ -21,9 +21,9 @@ class SqliteStructInfo {
   template <size_t I>
   using ColumnType = std::tuple_element_t<I, RowType>;
 
-  using TableInfo = SqliteStructInfoBuildCache::TableInfo;
+  using TableInfo = SqlConstructorBuildCache::TableInfo;
 
-  SqliteStructInfo(const TableInfo* kTableInfo, void* first_field_ref)
+  SqlConstructor(const TableInfo* kTableInfo, void* first_field_ref)
       : kTableInfo_(kTableInfo), first_field_ref_(first_field_ref) {
   }
 
@@ -72,9 +72,9 @@ class SqliteStructInfo {
 };
 
 template <typename T>
-  requires requires(T x) { x.sqlite_helper(); }
+  requires requires(T x) { x.sql_constructor(); }
 const auto& GetDefaultSqliteHelper() {
-  static auto kDefault = T{}.sqlite_helper();
+  static auto kDefault = T{}.sql_constructor();
   return kDefault;
 }
 
