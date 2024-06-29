@@ -1,6 +1,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "sol/sqlite_struct_info_builder.h"
+#include "sol/sql_constructor_builder.h"
 
 using namespace sqliteol;
 using namespace testing;
@@ -21,11 +21,11 @@ TEST(SqliteStructInfoTest, BuildSqliteStructInfo) {
     };
   };
   MyCustomType my_custom_type(1001, "myname", 180.5);
-  auto sqlite_struct_info = my_custom_type.sqlite_helper();
+  auto sql_constructor = my_custom_type.sqlite_helper();
   EXPECT_EQ(
-      sqlite_struct_info.GetEnsureTableSQL(),
+      sql_constructor.GetEnsureTableSQL(),
       "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INT, name TEXT, heigh REAL );");
-  EXPECT_EQ(sqlite_struct_info.GetInsertSQL(),
+  EXPECT_EQ(sql_constructor.GetInsertSQL(),
             "INSERT INTO \"MyCustomType\" ( id, name, heigh ) VALUES( 1001, 'myname', "
             "180.500000 );");
 }
@@ -45,13 +45,13 @@ TEST(SqliteStructInfoTest, SetField) {
   };
 
   MyCustomType2 my_custom_type(1001, "myname");
-  auto sqlite_struct_info = my_custom_type.sqlite_helper();
-  EXPECT_EQ(sqlite_struct_info.GetInsertSQL(),
+  auto sql_constructor = my_custom_type.sqlite_helper();
+  EXPECT_EQ(sql_constructor.GetInsertSQL(),
             "INSERT INTO \"MyCustomType2\" ( id, name ) VALUES( 1001, 'myname' );");
 
-  sqlite_struct_info.SetFieldByName("id", "1002");
-  sqlite_struct_info.SetFieldByName("name", "newname");
-  EXPECT_EQ(sqlite_struct_info.GetInsertSQL(),
+  sql_constructor.SetFieldByName("id", "1002");
+  sql_constructor.SetFieldByName("name", "newname");
+  EXPECT_EQ(sql_constructor.GetInsertSQL(),
             "INSERT INTO \"MyCustomType2\" ( id, name ) VALUES( 1002, 'newname' );");
 }
 

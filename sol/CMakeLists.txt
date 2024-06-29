@@ -10,9 +10,9 @@ sol_cc_gtest(
 
 sol_cc_gtest(
   NAME
-    sqlite_struct_info_test
+    sql_constructor_test
   SRCS
-    "sqlite_struct_info_test.cc"
+    "sql_constructor_test.cc"
   DEPS
 )
 

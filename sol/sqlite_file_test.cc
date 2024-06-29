@@ -4,7 +4,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "sol/sqlite_struct_info_builder.h"
+#include "sol/sql_constructor_builder.h"
 
 using namespace sqliteol;
 using namespace testing;

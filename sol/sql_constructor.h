@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "sol/sqlite_struct_info_build_cache.h"
+#include "sol/sql_constructor_build_cache.h"
 #include "sol/utils/str_utils.h"
 
 namespace sqliteol {

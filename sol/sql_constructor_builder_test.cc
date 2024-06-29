@@ -1,4 +1,4 @@
-#include "sol/sqlite_struct_info_builder.h"
+#include "sol/sql_constructor_builder.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -20,10 +20,10 @@ TEST(SqliteStructInfoBuilderTest, BuildSqliteStructInfo) {
     };
   };
 
-  auto sqlite_struct_info = MyCustomType().sqlite_helper();
-  EXPECT_EQ(sqlite_struct_info.GetEnsureTableSQL(),
+  auto sql_constructor = MyCustomType().sqlite_helper();
+  EXPECT_EQ(sql_constructor.GetEnsureTableSQL(),
             "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INTEGER, name TEXT );");
-  EXPECT_EQ(sqlite_struct_info.GetInsertSQL(),
+  EXPECT_EQ(sql_constructor.GetInsertSQL(),
             "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 0, );");
 }
 

@@ -8,8 +8,8 @@
 #include <vector>
 
 #include "sol/serialize_template.h"
-#include "sol/sqlite_struct_info.h"
-#include "sol/sqlite_struct_info_build_cache.h"
+#include "sol/sql_constructor.h"
+#include "sol/sql_constructor_build_cache.h"
 
 namespace sqliteol {
 

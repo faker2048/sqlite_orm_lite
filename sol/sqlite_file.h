@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "sol/sqlite_struct_info_builder.h"
+#include "sol/sql_constructor_builder.h"
 #include "sol/utils/str_utils.h"
 #include "sqlite3.h"
 
