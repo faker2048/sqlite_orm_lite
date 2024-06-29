@@ -35,6 +35,7 @@ void ExecuteSql(sqlite3* db,
                 int (*callback)(void*, int, char**, char**) = nullptr,
                 void* data                                  = nullptr) {
   char* err_msg = nullptr;
+  std::cout << sql << std::endl;
   if (sqlite3_exec(db, sql.c_str(), callback, data, &err_msg) != SQLITE_OK) {
     std::string error_message = "SQL execution failed: ";
     if (err_msg) {
@@ -52,7 +53,7 @@ concept HasSqliteHelper = requires { GetDefaultSqliteHelper<T>(); };
 
 class SqliteFile {
  public:
-  explicit SqliteFile(const std::filesystem::path& path) : path_(path) {
+  SqliteFile(const std::filesystem::path& path) : path_(path) {
   }
 
   template <HasSqliteHelper T>
@@ -75,38 +76,42 @@ class SqliteFile {
     std::vector<T> result;
     auto& helper    = GetDefaultSqliteHelper<T>();
     std::string sql = utils::StrCombine("SELECT * FROM \"", helper.GetTableName(), "\";");
-    auto db         = sqlite3wrap::OpenDatabase(path_.c_str());
 
     T row;
     auto sqlite_helper = row.sqlite_helper();
+    sqlite_helper.SetRef(&row);
 
-    using DataToSqliteC = std::tuple<T*, decltype(sqlite_helper)*, std::vector<T>*>;
-    DataToSqliteC data_to_sqlc{&row, &sqlite_helper, &result};
+    using CData = std::tuple<T*, decltype(sqlite_helper)*, std::vector<T>*>;
+    CData data_to_sqlc{&row, &sqlite_helper, &result};
     constexpr int column_size = decltype(sqlite_helper)::column_size_;
 
+    auto db = sqlite3wrap::OpenDatabase(path_.c_str());
     sqlite3wrap::ExecuteSql(
         db.get(),
         sql,
         [](void* data, int argc, char** argv, char** col_name) {
-          auto [row, sqlite_helper, result] = *static_cast<DataToSqliteC*>(data);
+          auto [row, sqlite_helper, result] = *static_cast<CData*>(data);
           if (argc != column_size) {
             throw std::runtime_error("Column size mismatch");
           }
 
           magic::ForRange<0, column_size>(
-              [&]<int I>() { sqlite_helper->SetFieldByIndex<I>(col_name[I], argv[I]); });
+              [&]<int I>() { sqlite_helper->template SetFieldByIndex<I>(argv[I]); });
+
           result->push_back(*row);
           return 0;
         },
-        &result);
+        &data_to_sqlc);
     return result;
   }
 
   template <HasSqliteHelper T>
   void Insert(T& row) {
     auto helper     = row.sqlite_helper();
-    std::string sql = helper.GenerateInsertSQL();
-    Execute(sql.c_str(), helper.GetTableName());
+    std::string sql = helper.GetInsertSQL();
+
+    auto db = sqlite3wrap::OpenDatabase(path_.c_str());
+    sqlite3wrap::ExecuteSql(db.get(), sql.c_str());
   }
 
   template <HasSqliteHelper T>
@@ -122,10 +127,12 @@ class SqliteFile {
     auto helper = rows.front().sqlite_helper();
     for (auto& row : rows) {
       helper.SetRef(&row);
-      sqls.emplace_back(helper.GenerateInsertSQL());
+      sqls.emplace_back(helper.GetInsertSQL());
     }
     sqls.emplace_back("COMMIT;");
-    Execute(utils::StrJoin("", sqls), rows.front().sqlite_helper().GetTableName());
+
+    auto db = sqlite3wrap::OpenDatabase(path_.c_str());
+    sqlite3wrap::ExecuteSql(db.get(), utils::StrJoin("", sqls));
   }
 
  private:

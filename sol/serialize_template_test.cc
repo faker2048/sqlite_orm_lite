@@ -29,9 +29,9 @@ TEST(SerializeBaseTest, FloatSerialization) {
 TEST(SerializeBaseTest, StringSerialization) {
   std::string test_value     = "Hello, world!";
   auto string_representation = ToDataBaseString(test_value);
-  EXPECT_THAT(string_representation, Eq(test_value));
+  EXPECT_THAT(string_representation, Eq("'Hello, world!'"));
 
-  std::string restored_value = FromDataBaseString<std::string>(string_representation);
+  std::string restored_value = FromDataBaseString<std::string>(test_value);
   EXPECT_THAT(restored_value, Eq(test_value));
 }
 

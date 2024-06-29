@@ -31,8 +31,12 @@ class SqliteStructInfoBuilder {
   }
 
   template <typename... ColumnTypes>
-  SqliteStructInfoBuilder(std::unique_ptr<TableInfo>&& tmp_, void* first_field_ref)
-      : tmp_(std::move(tmp_)), first_field_ref_(first_field_ref) {
+  SqliteStructInfoBuilder(std::unique_ptr<TableInfo>&& tmp_,
+                          const TableInfo* kTableInfo,
+                          void* first_field_ref)
+      : tmp_(std::move(tmp_)),
+        kTableInfo_(kTableInfo),
+        first_field_ref_(first_field_ref) {
   }
 
   SqliteStructInfoBuilder<CurColumnTypes...>& SetTableName(
@@ -42,8 +46,8 @@ class SqliteStructInfoBuilder {
 
     if (cached.has_value()) {
       kTableInfo_ = cached.value();
-      if (*kTableInfo_->row_tuple_type != typeid(CurRowTuple)) {
-        throw std::runtime_error("Table name already exists with different row type");
+      if (kTableInfo_ == nullptr) {
+        throw std::runtime_error("GetTableInfo return nullptr");
       }
     } else {
       tmp_             = std::make_unique<TableInfo>();
@@ -62,13 +66,20 @@ class SqliteStructInfoBuilder {
     if (!is_built()) {
       tmp_->column_names.emplace_back(column_name);
     }
-    return SqliteStructInfoBuilder<CurColumnTypes..., ColumnType>(std::move(tmp_),
-                                                                  first_field_ref_);
+    return SqliteStructInfoBuilder<CurColumnTypes..., ColumnType>(
+        std::move(tmp_), kTableInfo_, first_field_ref_);
   }
 
   SqliteStructInfo<CurRowTuple> Build() {
     if (!is_built()) {
       kTableInfo_ = CreateTableInfo();
+    } else if (*(kTableInfo_->row_tuple_type) != typeid(CurRowTuple)) {
+      throw std::runtime_error(
+          utils::StrCombine("Table name already exists with different row type.",
+                            " existing_row_type: ",
+                            kTableInfo_->row_tuple_type->name(),
+                            " new_row_type: ",
+                            typeid(CurRowTuple).name()));
     }
 
     return SqliteStructInfo<CurRowTuple>(kTableInfo_, first_field_ref_);
@@ -81,7 +92,7 @@ class SqliteStructInfoBuilder {
 
   const TableInfo* CreateTableInfo() {
     tmp_->ensure_table_sql = GetEnsureTableSql<CurRowTuple>();
-    tmp_->insert_sql_gen   = GenerateInsertSQLFunc<CurRowTuple>();
+    tmp_->insert_sql_gen   = GetInsertSQLFunc<CurRowTuple>();
     for (size_t i = 0; i < tmp_->column_names.size(); ++i) {
       tmp_->column_name_to_index.emplace(tmp_->column_names[i], i);
     }
@@ -110,15 +121,16 @@ class SqliteStructInfoBuilder {
   }
 
   template <typename RowTuple>
-  auto GenerateInsertSQLFunc() const {
+  auto GetInsertSQLFunc() const {
     constexpr size_t column_size    = std::tuple_size_v<RowTuple>;
     std::string column_names_joined = utils::StrJoin(", ", tmp_->column_names);
 
-    auto f = [table_name = tmp_->table_name, column_names_joined](void* first_field_ref) {
+    auto f = [table_name = tmp_->table_name,
+              column_names_joined](const void* first_field_ref) {
       std::vector<std::string> column_values = {};
       magic::ForRange<0, column_size>([&]<int I>() {
-        column_values.push_back(
-            ToDataBaseString(*magic::GetFieldRef<RowTuple, I>(first_field_ref)));
+        column_values.push_back(ToDataBaseString(
+            *magic::GetFieldRef<RowTuple, I>(const_cast<void*>(first_field_ref))));
       });
 
       return utils::StrCombine("INSERT INTO \"",

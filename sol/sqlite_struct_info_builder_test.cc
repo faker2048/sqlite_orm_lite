@@ -23,7 +23,7 @@ TEST(SqliteStructInfoBuilderTest, BuildSqliteStructInfo) {
   auto sqlite_struct_info = MyCustomType().sqlite_helper();
   EXPECT_EQ(sqlite_struct_info.GetEnsureTableSQL(),
             "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INTEGER, name TEXT );");
-  EXPECT_EQ(sqlite_struct_info.GenerateInsertSQL(),
+  EXPECT_EQ(sqlite_struct_info.GetInsertSQL(),
             "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 0, );");
 }
 

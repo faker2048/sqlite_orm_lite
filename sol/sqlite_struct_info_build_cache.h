@@ -15,12 +15,12 @@ namespace sqliteol {
 class SqliteStructInfoBuildCache {
  public:
   struct TableInfo {
-    std::string table_name                                           = "";
-    std::vector<std::string> column_names                            = {};
-    std::string ensure_table_sql                                     = "";
-    std::function<std::string(void* first_field_ref)> insert_sql_gen = nullptr;
-    std::unordered_map<std::string, int> column_name_to_index        = {};
-    const std::type_info* row_tuple_type                             = nullptr;
+    std::string table_name                                                 = "";
+    std::vector<std::string> column_names                                  = {};
+    std::string ensure_table_sql                                           = "";
+    std::function<std::string(const void* first_field_ref)> insert_sql_gen = nullptr;
+    std::unordered_map<std::string, int> column_name_to_index              = {};
+    const std::type_info* row_tuple_type                                   = nullptr;
   };
 
   static SqliteStructInfoBuildCache& GetInstance() {

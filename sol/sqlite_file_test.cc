@@ -45,37 +45,42 @@ struct MyCustomType {
   }
 };
 
-class SqliteFileTest : public Test {
- protected:
-  TmpDir tmp_dir{"SqliteTestDir"};
-  std::unique_ptr<SqliteFile> db_file;
+TEST(SqliteFileTest, InsertAndRetrieveData) {
+  TmpDir tmp_dir{"InsertAndRetrieveData"};
+  auto path = tmp_dir.path() / "test.db";
+  std::cout << path << std::endl;
+  SqliteFile db_file(path);
 
-  void SetUp() override {
-    db_file = std::make_unique<SqliteFile>(tmp_dir.path() / "test.db");
-    db_file->EnsureTable<MyCustomType>();
-  }
+  db_file.EnsureTable<MyCustomType>();
 
-  void TearDown() override {
-    db_file->DropTable<MyCustomType>();
-  }
-};
+  MyCustomType data = {1, "Alice", 1.70};
+  db_file.Insert(data);
 
-// TEST_F(SqliteFileTest, TableCreationAndDeletion) {
-//   // Test the creation and deletion of a table.
-//   // The SetUp and TearDown already handle this, so we assume no exceptions mean
-//   success. ASSERT_NO_THROW(db_file->EnsureTable<MyCustomType>());
-//   ASSERT_NO_THROW(db_file->DropTable<MyCustomType>());
-// }
+  auto retrieved = db_file.GetTable<MyCustomType>();
+  ASSERT_EQ(retrieved.size(), 1);
+  EXPECT_EQ(retrieved[0].id, data.id);
+  EXPECT_EQ(retrieved[0].name, data.name);
+  EXPECT_DOUBLE_EQ(retrieved[0].height, data.height);
+}
 
-// TEST_F(SqliteFileTest, InsertAndRetrieveData) {
-//   MyCustomType data = {1, "Alice", 1.70};
-//   ASSERT_NO_THROW(db_file->Insert(data));
+// TEST(SqliteFileTest, InsertRowsAndRetrieveData) {
+//   TmpDir tmp_dir{"InsertRowsAndRetrieveData"};
+//   SqliteFile db_file(tmp_dir.path() / "test.db");
 
-//   auto retrievedData = db_file->GetTable<MyCustomType>();
-//   ASSERT_EQ(retrievedData.size(), 1);
-//   EXPECT_EQ(retrievedData[0].id, data.id);
-//   EXPECT_EQ(retrievedData[0].name, data.name);
-//   EXPECT_DOUBLE_EQ(retrievedData[0].height, data.height);
+//   db_file.EnsureTable<MyCustomType>();
+
+//   std::vector<MyCustomType> data = {
+//       {1, "Alice", 1.70}, {2, "Bob", 1.80}, {3, "Charlie", 1.90}};
+
+//   db_file.InsertRows(data);
+
+//   auto retrieved = db_file.GetTable<MyCustomType>();
+//   ASSERT_EQ(retrieved.size(), data.size());
+//   for (int i = 0; i < data.size(); ++i) {
+//     EXPECT_EQ(retrieved[i].id, data[i].id);
+//     EXPECT_EQ(retrieved[i].name, data[i].name);
+//     EXPECT_DOUBLE_EQ(retrieved[i].height, data[i].height);
+//   }
 // }
 
 }  // namespace

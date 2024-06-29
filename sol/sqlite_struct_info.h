@@ -35,11 +35,11 @@ class SqliteStructInfo {
     return kTableInfo_->ensure_table_sql;
   }
 
-  std::string GenerateInsertSQL() const {
+  std::string GetInsertSQL() const {
     return kTableInfo_->insert_sql_gen(first_field_ref_);
   }
 
-  void SetField(const std::string& column_name, const std::string& value) const {
+  void SetFieldByName(const std::string& column_name, const std::string& value) const {
     magic::ForRange<0, column_size_>([&]<int I>() {
       if (column_name == kTableInfo_->column_names[I]) {
         *magic::GetFieldRef<RowTuple, I>(first_field_ref_) =
@@ -50,6 +50,10 @@ class SqliteStructInfo {
 
   template <int I>
   void SetFieldByIndex(const std::string& value) const {
+    static_assert(I >= 0 && I < column_size_, "Index out of range");
+    if (!first_field_ref_) {
+      throw std::runtime_error("first_field_ref_ is nullptr");
+    }
     *magic::GetFieldRef<RowTuple, I>(first_field_ref_) =
         FromDataBaseString<ColumnType<I>>(value);
   }

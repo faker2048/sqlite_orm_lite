@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include "sol/utils/magic.h"
+#include "sol/utils/str_utils.h"
 
 /**
  * @file
@@ -94,7 +95,7 @@ constexpr std::string_view ToDataBaseType<std::string>() {
 
 template <>
 std::string ToDataBaseString(const std::string& value) {
-  return value;
+  return utils::StrCombine("'", value, "'");
 }
 
 template <>
