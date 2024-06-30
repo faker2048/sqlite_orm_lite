@@ -67,7 +67,7 @@ constexpr std::size_t GetTupleValueOffset() {
 }
 
 template <typename Tuple, std::size_t I>
-std::tuple_element_t<I, Tuple>* GetFieldRef(void* first_field_ref) {
+std::tuple_element_t<I, Tuple>* GetAlignedRefByIndex(void* first_field_ref) {
   if constexpr (I == 0) {
     return reinterpret_cast<std::tuple_element_t<I, Tuple>*>(first_field_ref);
   } else {

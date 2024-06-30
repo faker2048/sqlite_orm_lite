@@ -42,7 +42,7 @@ class SqlConstructor {
   void SetFieldByName(const std::string& column_name, const std::string& value) const {
     magic::ForRange<0, column_size_>([&]<int I>() {
       if (column_name == kTableInfo_->column_names[I]) {
-        *magic::GetFieldRef<RowTuple, I>(first_field_ref_) =
+        *magic::GetAlignedRefByIndex<RowTuple, I>(first_field_ref_) =
             FromDataBaseString<ColumnType<I>>(value);
       }
     });
@@ -54,7 +54,7 @@ class SqlConstructor {
     if (!first_field_ref_) {
       throw std::runtime_error("first_field_ref_ is nullptr");
     }
-    *magic::GetFieldRef<RowTuple, I>(first_field_ref_) =
+    *magic::GetAlignedRefByIndex<RowTuple, I>(first_field_ref_) =
         FromDataBaseString<ColumnType<I>>(value);
   }
 

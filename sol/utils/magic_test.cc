@@ -47,7 +47,7 @@ TEST(MagicTest, GetTupleValueOffsetFunc) {
   EXPECT_EQ((char*)&test_struct.c, (char*)first_field_ref + offset_2);
 }
 
-TEST(MagicTest, GetFieldRefFunc) {
+TEST(MagicTest, GetAlignedRefByIndexFunc) {
   using TestTuple = std::tuple<int, double, std::string>;
   struct TestStruct {
     int a;
@@ -57,9 +57,9 @@ TEST(MagicTest, GetFieldRefFunc) {
   TestStruct test_struct{1, 3.14, "hello"};
   void* first_field_ref = &test_struct;
 
-  auto* field_ref_0 = GetFieldRef<TestTuple, 0>(first_field_ref);
-  auto* field_ref_1 = GetFieldRef<TestTuple, 1>(first_field_ref);
-  auto* field_ref_2 = GetFieldRef<TestTuple, 2>(first_field_ref);
+  auto* field_ref_0 = GetAlignedRefByIndex<TestTuple, 0>(first_field_ref);
+  auto* field_ref_1 = GetAlignedRefByIndex<TestTuple, 1>(first_field_ref);
+  auto* field_ref_2 = GetAlignedRefByIndex<TestTuple, 2>(first_field_ref);
   static_assert(std::is_same_v<decltype(field_ref_0), int*>);
   static_assert(std::is_same_v<decltype(field_ref_1), double*>);
   static_assert(std::is_same_v<decltype(field_ref_2), std::string*>);
@@ -69,7 +69,7 @@ TEST(MagicTest, GetFieldRefFunc) {
   EXPECT_EQ(*field_ref_2, "hello");
 }
 
-TEST(MagicTest, GetFieldRefFuncForceTest) {
+TEST(MagicTest, GetAlignedRefByIndexFuncForceTest) {
   using TestTuple =
       std::tuple<int, double, std::string, float, int64_t, int32_t, int8_t, char>;
   struct TestStruct {
@@ -91,7 +91,7 @@ TEST(MagicTest, GetFieldRefFuncForceTest) {
   constexpr std::size_t tuple_size = std::tuple_size_v<TestTuple>;
 
   magic::ForRange<0, tuple_size>([&]<int I>() {
-    auto* field_ref = magic::GetFieldRef<TestTuple, I>(first_field_ref);
+    auto* field_ref = magic::GetAlignedRefByIndex<TestTuple, I>(first_field_ref);
     auto& value     = std::get<I>(test_struct_tuple);
     EXPECT_EQ(*field_ref, value);
   });
