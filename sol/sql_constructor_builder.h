@@ -27,7 +27,7 @@ class SqlConstructorBuilder {
   static constexpr std::string_view SqliteColumnTypeStr_v =
       ToDataBaseType<std::tuple_element_t<I, CurRowTuple>>();
 
-  explicit SqlConstructorBuilder() {
+  inline SqlConstructorBuilder() {
   }
 
   template <typename... ColumnTypes>
@@ -39,7 +39,8 @@ class SqlConstructorBuilder {
         first_field_ref_(first_field_ref) {
   }
 
-  SqlConstructorBuilder<CurColumnTypes...>& SetTableName(const std::string& table_name) {
+  inline SqlConstructorBuilder<CurColumnTypes...>& SetTableName(
+      const std::string& table_name) {
     std::optional<const TableInfo*> cached =
         BuildCache::GetInstance().GetTableInfo(table_name);
 
@@ -69,7 +70,7 @@ class SqlConstructorBuilder {
         std::move(tmp_), kTableInfo_, first_field_ref_);
   }
 
-  SqlConstructor<CurRowTuple> Build() {
+  inline SqlConstructor<CurRowTuple> Build() {
     if (!is_built()) {
       kTableInfo_ = CreateTableInfo();
     } else if (*(kTableInfo_->row_tuple_type) != typeid(CurRowTuple)) {
@@ -89,7 +90,7 @@ class SqlConstructorBuilder {
     return kTableInfo_ != nullptr;
   }
 
-  const TableInfo* CreateTableInfo() {
+  inline const TableInfo* CreateTableInfo() {
     tmp_->ensure_table_sql = GetEnsureTableSql<CurRowTuple>();
     tmp_->insert_sql_gen   = GetInsertSQLFunc<CurRowTuple>();
     for (size_t i = 0; i < tmp_->column_names.size(); ++i) {
@@ -120,7 +121,7 @@ class SqlConstructorBuilder {
   }
 
   template <typename RowTuple>
-  auto GetInsertSQLFunc() const {
+  std::function<std::string(const void* first_field_ref)> GetInsertSQLFunc() const {
     constexpr size_t column_size    = std::tuple_size_v<RowTuple>;
     std::string column_names_joined = utils::StrJoin(", ", tmp_->column_names);
 

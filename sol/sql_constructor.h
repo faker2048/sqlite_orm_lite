@@ -23,23 +23,24 @@ class SqlConstructor {
 
   using TableInfo = SqlConstructorBuildCache::TableInfo;
 
-  SqlConstructor(const TableInfo* kTableInfo, void* first_field_ref)
+  inline SqlConstructor(const TableInfo* kTableInfo, void* first_field_ref)
       : kTableInfo_(kTableInfo), first_field_ref_(first_field_ref) {
   }
 
-  void SetRef(void* first_field_ref) {
+  inline void SetRef(void* first_field_ref) {
     first_field_ref_ = first_field_ref;
   }
 
-  const std::string& GetEnsureTableSQL() const {
+  inline const std::string& GetEnsureTableSQL() const {
     return kTableInfo_->ensure_table_sql;
   }
 
-  std::string GetInsertSQL() const {
+  inline std::string GetInsertSQL() const {
     return kTableInfo_->insert_sql_gen(first_field_ref_);
   }
 
-  void SetFieldByName(const std::string& column_name, const std::string& value) const {
+  inline void SetFieldByName(const std::string& column_name,
+                             const std::string& value) const {
     magic::ForRange<0, column_size_>([&]<int I>() {
       if (column_name == kTableInfo_->column_names[I]) {
         *magic::GetAlignedRefByIndex<RowTuple, I>(first_field_ref_) =
@@ -58,11 +59,11 @@ class SqlConstructor {
         FromDataBaseString<ColumnType<I>>(value);
   }
 
-  std::string_view GetTableName() const {
+  inline std::string_view GetTableName() const {
     return kTableInfo_->table_name;
   }
 
-  const std::vector<std::string>& GetColumnNames() const {
+  inline const std::vector<std::string>& GetColumnNames() const {
     return kTableInfo_->column_names;
   }
 

@@ -12,7 +12,7 @@ namespace sqliteol {
 namespace sqlite3wrap {
 
 struct DbDeleter {
-  void operator()(sqlite3* db) const {
+  inline void operator()(sqlite3* db) const {
     if (db) {
       sqlite3_close(db);
     }
@@ -21,7 +21,7 @@ struct DbDeleter {
 
 using DbPtr = std::unique_ptr<sqlite3, DbDeleter>;
 
-DbPtr OpenDatabase(const char* filename) {
+inline DbPtr OpenDatabase(const char* filename) {
   sqlite3* db = nullptr;
   if (sqlite3_open(filename, &db) != SQLITE_OK) {
     throw std::runtime_error(
@@ -30,10 +30,10 @@ DbPtr OpenDatabase(const char* filename) {
   return DbPtr(db);
 }
 
-void ExecuteSql(sqlite3* db,
-                const std::string& sql,
-                int (*callback)(void*, int, char**, char**) = nullptr,
-                void* data                                  = nullptr) {
+inline void ExecuteSql(sqlite3* db,
+                       const std::string& sql,
+                       int (*callback)(void*, int, char**, char**) = nullptr,
+                       void* data                                  = nullptr) {
   char* err_msg = nullptr;
   std::cout << sql << std::endl;
   if (sqlite3_exec(db, sql.c_str(), callback, data, &err_msg) != SQLITE_OK) {
@@ -53,7 +53,7 @@ concept HasSqliteHelper = requires { GetDefaultSqliteHelper<T>(); };
 
 class SqliteFile {
  public:
-  SqliteFile(const std::filesystem::path& path) : path_(path) {
+  inline SqliteFile(const std::filesystem::path& path) : path_(path) {
   }
 
   template <HasSqliteHelper T>

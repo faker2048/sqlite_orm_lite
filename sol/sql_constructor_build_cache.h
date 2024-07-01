@@ -23,7 +23,7 @@ class SqlConstructorBuildCache {
     const std::type_info* row_tuple_type                                   = nullptr;
   };
 
-  static SqlConstructorBuildCache& GetInstance() {
+  inline static SqlConstructorBuildCache& GetInstance() {
     static SqlConstructorBuildCache instance;
     return instance;
   }
@@ -31,7 +31,8 @@ class SqlConstructorBuildCache {
   SqlConstructorBuildCache(const SqlConstructorBuildCache&)            = delete;
   SqlConstructorBuildCache& operator=(const SqlConstructorBuildCache&) = delete;
 
-  std::optional<const TableInfo*> GetTableInfo(const std::string& table_name) const {
+  inline std::optional<const TableInfo*> GetTableInfo(
+      const std::string& table_name) const {
     std::shared_lock lock(cache_mutex_);
 
     auto it = cache_.find(table_name);
@@ -41,7 +42,7 @@ class SqlConstructorBuildCache {
     return &it->second;
   }
 
-  bool AddTableInfo(TableInfo&& table_info) {
+  inline bool AddTableInfo(TableInfo&& table_info) {
     if (GetTableInfo(table_info.table_name).has_value()) {
       return false;
     }
