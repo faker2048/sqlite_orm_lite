@@ -10,6 +10,14 @@ sol_cc_gtest(
 
 sol_cc_gtest(
   NAME
+    sql_constructor_builder_test
+  SRCS
+    "sql_constructor_builder_test.cc"
+  DEPS
+)
+
+sol_cc_gtest(
+  NAME
     sql_constructor_test
   SRCS
     "sql_constructor_test.cc"
