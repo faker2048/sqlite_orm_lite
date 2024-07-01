@@ -129,9 +129,13 @@ class SqlConstructorBuilder {
               column_names_joined](const void* first_field_ref) {
       std::vector<std::string> column_values = {};
       magic::ForRange<0, column_size>([&]<int I>() {
-        column_values.push_back(
-            ToDataBaseString(*magic::GetAlignedRefByIndex<RowTuple, I>(
-                const_cast<void*>(first_field_ref))));
+        using ColumnType  = std::tuple_element_t<I, RowTuple>;
+        std::string value = ToDataBaseString(*magic::GetAlignedRefByIndex<RowTuple, I>(
+            const_cast<void*>(first_field_ref)));
+        if constexpr (std::is_same_v<ColumnType, std::string>) {
+          value = utils::StrCombine("'", value, "'");
+        }
+        column_values.push_back(value);
       });
 
       return utils::StrCombine("INSERT INTO \"",
