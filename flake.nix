@@ -42,8 +42,6 @@
             gtest
 
             # Build time and Run time dependencies
-            spdlog
-            abseil-cpp
             sqlite.dev
           ];
 
