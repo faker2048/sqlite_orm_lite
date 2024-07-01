@@ -20,11 +20,12 @@ TEST(SqlConstructorBuilderTest, BuildSqlConstructor) {
     };
   };
 
-  auto sql_constructor = MyCustomType().sql_constructor();
+  MyCustomType my_custom_type(111, "myname");
+  auto sql_constructor = my_custom_type.sql_constructor();
   EXPECT_EQ(sql_constructor.GetEnsureTableSQL(),
-            "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INTEGER, name TEXT );");
+            "CREATE TABLE IF NOT EXISTS \"MyCustomType\"( id INT, name TEXT );");
   EXPECT_EQ(sql_constructor.GetInsertSQL(),
-            "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 0, );");
+            "INSERT INTO \"MyCustomType\" ( id, name ) VALUES( 111, 'myname' );");
 }
 
 int main(int argc, char** argv) {
