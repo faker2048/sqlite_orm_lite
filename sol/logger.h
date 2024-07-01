@@ -4,6 +4,8 @@
 #include <iostream>
 #include <memory>
 
+namespace sqliteol {
+
 class Logger {
  public:
   struct LogFunction {
@@ -71,3 +73,5 @@ class Logger {
 
   LogFunction log_functions_;
 };
+
+}  // namespace sqliteol

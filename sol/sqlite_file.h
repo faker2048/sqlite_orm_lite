@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "sol/logger.h"
 #include "sol/sql_constructor_builder.h"
 #include "sol/utils/str_utils.h"
 #include "sqlite3.h"
@@ -35,7 +36,7 @@ inline void ExecuteSql(sqlite3* db,
                        int (*callback)(void*, int, char**, char**) = nullptr,
                        void* data                                  = nullptr) {
   char* err_msg = nullptr;
-  std::cout << sql << std::endl;
+  Logger::getInstance().debug("Executing SQL: " + sql);
   if (sqlite3_exec(db, sql.c_str(), callback, data, &err_msg) != SQLITE_OK) {
     std::string error_message = "SQL execution failed: ";
     if (err_msg) {
