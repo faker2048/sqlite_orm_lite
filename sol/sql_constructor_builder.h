@@ -132,7 +132,7 @@ class SqlConstructorBuilder {
         using ColumnType  = std::tuple_element_t<I, RowTuple>;
         std::string value = ToDataBaseString(*magic::GetAlignedRefByIndex<RowTuple, I>(
             const_cast<void*>(first_field_ref)));
-        if constexpr (std::is_same_v<ColumnType, std::string>) {
+        if constexpr (ToDataBaseType<ColumnType>() == "TEXT") {
           value = utils::StrCombine("'", value, "'");
         }
         column_values.push_back(value);
