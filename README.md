@@ -2,7 +2,7 @@
 sqlite orm, c++20, simple, and easy to use.
 
 ## Usage
-```
+```C++
 struct MyCustomType {
   int id;
   std::string name;
