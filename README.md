@@ -70,3 +70,7 @@ TEST(SqliteFileTest, InsertRowsAndRetrieveData) {
   }
 }
 ```
+
+## Code Standards
+This project follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). Adhering to these guidelines ensures that the codebase remains clean, consistent, and maintainable.
+
