@@ -3,9 +3,9 @@
 sqlite orm, C++20, simple, and easy to use.
 
 Features:
-- Utilizes TMP (Template Metaprogramming) techniques, no macros involved
-- User-friendly and straightforward
-
+- Minimalist: Only 500 lines of code
+- Modern C++20: Utilizes Template Metaprogramming (TMP) techniques, with no macros involved
+- Intuitive: User-friendly and straightforward API
 ## Build
 ```bash
 git clone https://github.com/faker2048/sqlite_orm_lite.git
