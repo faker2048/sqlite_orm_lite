@@ -3,7 +3,7 @@
 sqlite orm, C++20, simple, and easy to use.
 
 Features:
-- Minimalist: Only 500 lines of code
+- Minimalist: Only 500 lines of code. Easily adaptable to other databases.
 - Modern C++20: Utilizes Template Metaprogramming (TMP) techniques, with no macros involved
 - Intuitive: User-friendly and straightforward API
 ## Build
